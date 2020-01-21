@@ -1,4 +1,4 @@
-# HonorsThesis
+# Honors Thesis
 
 This is the repository for Connor Belanger and Eric DeJarnett's honors thesis work at Arizona State University.
 
