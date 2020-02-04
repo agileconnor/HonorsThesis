@@ -1,20 +1,40 @@
 import numpy
 import csv
 
-t_file = open('transition_table.csv', 'r')
-t_list = list(csv.reader(t_file))
+num_actions = 0
 
-t_list = t_list[1:]
-actions = []
-for row in t_list:
-    state0 = row[1:4]
-    state1 = row[4:7]
-    actions.append([state0, state1])
+def convertTransitions():
+    t_file = open('transition_table.csv', 'r')
+    t_list = list(csv.reader(t_file))
 
-print(actions)
+    t_list = t_list[1:]
+    actions = []
+    for row in t_list:
+        state0 = row[1:4]
+        state1 = row[4:7]
+        actions.append([state0, state1])
 
-transitions = numpy.array(actions)
+    print(actions)
+    num_actions = len(actions)
 
-print(transitions)
+    transitions = numpy.array(actions)
+
+    print(transitions)
+
+    return transitions
+
+def convertRewards():
+    #Put rewards table stuff here
+    r_file = open('rewards_table.csv', 'r')
+    r_list = list(csv.reader(r_file))
+
+    r_list = r_list[1:]
+
+def processNetwork(netFile):
+    n_file = open(netFile, 'r')
+
+def generateTables(netFile):
+    transitions = convertTransitions()
+    rewards = convertRewards()
 
 
