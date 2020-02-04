@@ -8,4 +8,12 @@ class ActionType(object):
 
 class NetworkAction(DiscreteAction):
 	# child class for network action
-	pass
+	def __init__():
+		super(NetworkAction, self).__init__(action_type)
+		self.bin_number = action_type
+
+	def to_string():
+		print("Implementation Error: please implement to_string() in network-action.py")
+
+	def print_action():
+		print("Implementation Error: please implement print_action() in network-action.py")
