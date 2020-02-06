@@ -30,6 +30,15 @@ def convertRewards():
     r_list = list(csv.reader(r_file))
 
     r_list = r_list[1:]
+    rewards = []
+    for row in r_list:
+        r1 = list(map(int, row[1:]))
+        rewards.append(r1)
+
+    rewards = numpy.array(rewards)
+    r_file.close()
+
+    return rewards
 
 def processNetwork(netFile):
     n_file = open(netFile, 'r')
@@ -41,6 +50,7 @@ def processNetwork(netFile):
         computer = list(map(int, row[1:]))
         computers.append(computer)
 
+    n_file.close()
     return computers
 
 def generateTables(netFile):
