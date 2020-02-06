@@ -12,7 +12,8 @@ def convertTransitions():
     for row in t_list:
         state0 = list(map(float, row[1:4]))
         state1 = list(map(float, row[4:7]))
-        actions.append([state0, state1])
+        state2 = list(map(float, row[7:10]))
+        actions.append([state0, state1, state2])
 
     #print(actions)
     num_actions = len(actions)
@@ -74,6 +75,20 @@ def generateTables(netFile):
 
     print("Averaged Transition Table Generated")
     print(newTransitions)
+
+    for action in newTransitions:
+        state_num = 0
+        for state in action:
+            arr_sum = numpy.sum(state)
+            if arr_sum == 0.0:
+                state[state_num] = 1
+            else:
+                diff = 1 - arr_sum
+                diff = diff / 3
+                for substate in range(0, len(state)):
+                    state[substate] = state[substate] + diff
+            state_num += 1
+        
 
     return [newTransitions, rewards]
 
