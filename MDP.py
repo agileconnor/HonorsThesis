@@ -2,12 +2,15 @@ import mdptoolbox.example
 import mdptoolbox
 import numpy_convert
 
-P = numpy_convert.convert()
+P,R = numpy_convert.generateTables('network.csv')
 
 print("Transition Array")
 print(P)
 print("Reward Array")
 print(R)
+
+print(P.shape)
+print(R.shape)
 
 print("Running MDP Policy Iteration")
 
