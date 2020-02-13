@@ -15,23 +15,23 @@ class NetworkObservation(DiscreteObservation):
 		return (self.sql_vuln == other.sql_vuln and self.ftp_vuln == other.ftp_vuln and self.mitm_vuln == other.mitm_vuln)
 
 	def to_string(self):
+		out = ""
 		if self.sql_vuln:
 			out += "SQL vulnerability"
-		elif self.ftp_vuln:
+		if self.ftp_vuln:
 			out += "FTP vulnerability"
-		elif self.mitm_vuln:
+		if self.mitm_vuln:
 			out += "MITM vulnerability"
-		else:
+		if out = "":
 			out += "No vulnerability"
 		return out
 
 	def print_observation(self):
 		if self.sql_vuln:
 			print("SQL vulnerability")
-		elif self.ftp_vuln:
+		if self.ftp_vuln:
 			print("FTP vulnerability")
-		elif self.mitm_vuln:
+		if self.mitm_vuln:
 			print("MITM vulnerability")
-		else:
-			print("Invalid observation")
+
 
