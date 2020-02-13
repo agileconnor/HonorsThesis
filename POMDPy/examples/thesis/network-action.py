@@ -4,7 +4,13 @@ from builtins import object
 
 class ActionType(object):
 	# enumerate actions
-	PLACEHOLDER = -1
+	SCAN = 0
+	DEPLOY_AGENT = 1
+	LATERAL_MOVE = 2
+	SQL_VULN = 3
+	FTP_VULN = 4
+	MITM_VULN = 5
+
 
 class NetworkAction(DiscreteAction):
 	# child class for network action
@@ -16,4 +22,18 @@ class NetworkAction(DiscreteAction):
 		print("Implementation Error: please implement to_string() in network-action.py")
 
 	def print_action():
-		print("Implementation Error: please implement print_action() in network-action.py")
+		if self.bin_number == 0:
+			print("SCAN")
+		elif self.bin_number == 1:
+			print("DEPLOY AGENT")
+		elif self.bin_number == 2:
+			print("LATERAL MOVE")
+		elif self.bin_number == 3:
+			print("SQL VULNERABILITY")
+		elif self.bin_number == 4:
+			print("FTP VULNERABILITY")
+		elif self.bin_number == 5:
+			print("MITM VULNERABILITY")
+		else:
+			print("UNDEFINED ACTION")
+
