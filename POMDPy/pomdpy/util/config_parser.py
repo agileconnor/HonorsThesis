@@ -3,11 +3,13 @@ import os
 # important directories
 CFG_DIR = 'config'
 ROCK_CFG_FILE = 'rock_sample_config.json'
+NETWORK_CFG_FILE = 'network_config_1.json'
 LOG_DIR = 'log'
 LOG_FILE = 'POMDPy.log'
 
 my_dir = os.path.dirname(__file__)
 rock_cfg = os.path.join(my_dir, '..', CFG_DIR, ROCK_CFG_FILE)
+network_cfg = os.path.join(my_dir, '..', CFG_DIR, NETWORK_CFG_FILE)
 log_path = os.path.join(my_dir, '..', LOG_DIR, LOG_FILE)
 
 
