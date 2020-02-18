@@ -92,3 +92,18 @@ def generateTables(netFile):
 
     return [newTransitions, rewards]
 
+def actionToText(policy):
+    t_file = open('transition_table.csv', 'r')
+    t_list = list(csv.reader(t_file))
+    t_list = t_list[1:]
+
+    actions = []
+    for row in t_list:
+        actions.append(row[0])
+
+    textPolicy = []
+    for act in policy:
+        textPolicy.append(actions[act])
+
+    print(textPolicy)
+

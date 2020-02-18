@@ -19,4 +19,4 @@ pi.setVerbose()
 pi.run()
 
 print("Final Policy")
-print(pi.policy)
+numpy_convert.actionToText(pi.policy)
