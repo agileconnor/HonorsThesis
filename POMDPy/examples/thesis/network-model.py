@@ -10,7 +10,7 @@ from pomdpy.pomdp import model
 from pomdpy.util import console, config_parser
 
 
-class NetworkNode:
+class NetNodeType:
 	ACCESSIBLE = 0
  	SQL_VULN = 1
 	FTP_VULN = 2
@@ -23,20 +23,19 @@ class NetworkNode:
 	GOAL = 9
 
 class NetworkModel(model.Model):
-	#unfinished
 	def __init__(self, args):
 		# initial setup of network model variables
 		super(NetworkModel, self).__init__(args)
 		self.network_config = json.load(open(config_parser.network_config, "r"))
 
-		# Configuration Data #
-		# TBD
-
 		# Collected Data #
 		self.unique_nodes_scanned = []
 		self.num_scans = 0
 		
-		# Network Data #
+		# Network Configuration Data #
+		self.network_config = json.load(open(config_parser.network_cfg, "r"))
+		self.map_text, _ = config_parser.parse_map(self.network_config['layout_file'])
+		# read in raw text and build network based on it
 		# TBD
 
 
@@ -50,7 +49,7 @@ class NetworkModel(model.Model):
 		return DiscreteObservationPool(solver)
 
 	def is_terminal(self, network_state):
-		return self.get_cell_type(network_state) is NetworkNode.GOAL
+		return self.get_cell_type(network_state) is NetNodeType.GOAL
 
 	#unfinished
 	def is_valid(self, state):

@@ -1,15 +1,21 @@
 from builtins import object
+from builtins import str
 import numpy as np
 from pomdpy.pomdp import HistoricalData
 from network_action import ActionType
 
 class NodeData(object):
-	def __init__(self):
+	def __init__(self, adj_list, vuln=0):
 		self.check_count = 0
-		self.vuln = -1
+		self.adj_list = adj_list
+		self.vuln = vuln
 		
 	def to_string(self):
-		return 'Check count: '+str(self.check_count)+' Vulnerability: '+str(self.vuln)
+		out = ''
+		out += 'Check count: '+str(self.check_count)
+		out += '\nAdjacency:'+str(adj_list[1:])
+		out += '\nVulnerability: '+str(self.vuln)
+		return out
 
 
 class HistoricalNetworkData(HistoricalData):

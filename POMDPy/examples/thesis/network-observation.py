@@ -17,11 +17,11 @@ class NetworkObservation(DiscreteObservation):
 	def to_string(self):
 		out = ""
 		if self.sql_vuln:
-			out += "SQL vulnerability"
+			out += "SQL vulnerability "
 		if self.ftp_vuln:
-			out += "FTP vulnerability"
+			out += "FTP vulnerability "
 		if self.mitm_vuln:
-			out += "MITM vulnerability"
+			out += "MITM vulnerability "
 		if out = "":
 			out += "No vulnerability"
 		return out
