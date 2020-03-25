@@ -4,7 +4,7 @@ from pomdpy import Agent
 from pomdpy.solvers import POMCP
 from pomdpy.log import init_logger
 from examples.rock_sample import RockModel
-from examples.thesis import NetworkModel
+#from examples.thesis import NetworkModel
 import argparse
 import numpy as np
 
@@ -63,11 +63,11 @@ if __name__ == '__main__':
         env.draw_env()
         agent = Agent(env, solver)
         agent.discounted_return()
-	elif args['env'] == 'NetworkProblem':
-		env = NetworkModel(args)
-		#can be added in later?
-		#env.draw_env()
-		agent = Agent(env, solver)
-		agent.discounted_return()
+    elif args['env'] == 'NetworkProblem':
+        env = NetworkModel(args)
+        #can be added in later?
+        #env.draw_env()
+        agent = Agent(env, solver)
+        agent.discounted_return()
     else:
         print('Unknown env {}'.format(args['env']))
