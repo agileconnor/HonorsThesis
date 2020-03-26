@@ -93,6 +93,20 @@ class HistorySequence(object):
             print("next state: ", entry.state.to_string())
             print("reward: ", entry.reward)
 
+    def history_to_string(self):
+        out = ''
+        out += '\n============================='
+        out += '\n Displaying history sequence '
+        for entry in self.entry_sequence:
+            out += '\n============================='
+            out += '\nid: '+str(entry.id)
+            out += '\naction: '+str(entry.action.to_string())
+            out += '\nobservation: '+str(entry.observation.to_string())
+            out += '\nnext state: '+str(entry.state.to_string())
+            out += '\nreward: '+str(entry.reward)
+        return out
+
+
 
 class Histories(object):
     """
