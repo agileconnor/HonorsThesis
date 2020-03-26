@@ -1,0 +1,13 @@
+---
+
+- id: f88b3ffb-324f-40cb-a060-8a3da2a9fdae
+  name: VNC Exploit
+  description: Access host using weak VNC
+  tactic: initial-access
+  technique:
+          attack_id: T0000
+          name: VNC Bad Pass
+  platforms:
+          linux:
+                  sh:
+                          command: echo "VNC Access"

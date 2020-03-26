@@ -1,0 +1,13 @@
+---
+
+- id: 75e92488-bd04-457d-ab0c-71613cee22b2
+  name: SMTP Exploit
+  description: Access host using weak SMTP
+  tactic: initial-access
+  technique:
+          attack_id: T0002
+          name: SMTP Backdoor
+  platforms:
+          linux:
+                  sh:
+                          command: echo "SMTP Access"
