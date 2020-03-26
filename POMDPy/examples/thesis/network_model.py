@@ -237,7 +237,7 @@ class NetworkModel(Model):
         elif action_type is ActionType.LATERAL_MOVE:
             if current_node not in self.unique_nodes_scanned:
                 self.unique_nodes_scanned.append(current_node)
-            for node in self.node_list.keys():
+            for node in self.node_list.values():
                 if node not in self.unique_nodes_scanned:
                     next_node = node 
 
@@ -267,9 +267,7 @@ class NetworkModel(Model):
             return obs
         if next_state.current_node in self.unique_nodes_scanned:
             return NetworkObservation(False, False, False, False)
-        print('--------')
-        print(next_state)
-        print('--------')
+
         # generate observation if scanning a node
         if action.bin_number is ActionType.SCAN:
             self.last_action_scan = True
