@@ -1,0 +1,13 @@
+---
+
+- id: fd70bc05-37aa-4930-be10-6560c587cc86
+  name: FTP Exploit
+  description: Access host using FTP backdoor
+  tactic: initial-access
+  technique:
+          attack_id: T0004
+          name: FTP Backdoor
+  platforms:
+          linux:
+                  sh:
+                          command: echo "FTP Access"

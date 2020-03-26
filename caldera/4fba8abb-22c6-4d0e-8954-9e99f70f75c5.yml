@@ -1,0 +1,13 @@
+---
+
+- id: 4fba8abb-22c6-4d0e-8954-9e99f70f75c5
+  name: SQL Exploit
+  description: Access host using SQL backdoor
+  tactic: initial-access
+  technique:
+          attack_id: T0001
+          name: SQL Injection
+  platforms:
+          linux:
+                  sh:
+                          command: echo "SQL Injection"
