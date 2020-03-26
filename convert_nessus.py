@@ -136,15 +136,18 @@ if __name__ == '__main__':
     for ip in device_dict.keys():
         for plugin in device_dict[ip].keys():
             if int(device_dict[ip][plugin]['severity']) > 0:
-                if 'SMTP' in device_dict[ip][plugin]['pluginFamily'] or 'SMTP' in 'SMTP' in device_dict[ip][plugin]['pluginName']:
+                if 'SMTP' in device_dict[ip][plugin]['pluginFamily'] or 'SMTP' in device_dict[ip][plugin]['pluginName']:
                     if 'SMTP' not in ip_vuln_dict[ip]:
                         ip_vuln_dict[ip].append('SMTP')
-                elif 'FTP' in device_dict[ip][plugin]['pluginFamily'] or 'FTP' in 'FTP' in device_dict[ip][plugin]['pluginName']:
+                elif 'FTP' in device_dict[ip][plugin]['pluginFamily'] or 'FTP' in device_dict[ip][plugin]['pluginName']:
                     if 'FTP' not in ip_vuln_dict[ip]:
                         ip_vuln_dict[ip].append('FTP')
-                elif 'SQL' in device_dict[ip][plugin]['pluginFamily'] or 'SQL' in 'SQL' in device_dict[ip][plugin]['pluginName']:
+                elif 'SQL' in device_dict[ip][plugin]['pluginFamily'] or 'SQL' in device_dict[ip][plugin]['pluginName']:
                     if 'SQL' not in ip_vuln_dict[ip]:
                         ip_vuln_dict[ip].append('SQL')
+                elif 'VNC' in device_dict[ip][plugin]['pluginFamily'] or 'VNC' in device_dict[ip][plugin]['pluginName']:
+                    if 'VNC' not in ip_vuln_dict[ip]:
+                        ip_vuln_dict[ip].append('VNC')
                 '''
                 print(str(ip)+'|'+str(plugin))
                 print(device_dict[ip][plugin]['pluginFamily'])
@@ -156,9 +159,88 @@ if __name__ == '__main__':
                 print('------------------------------')
                 '''
 
+    '''
+    class NetNodeType:
+        ACCESSIBLE = 0
+        SQL_VULN = 1
+        FTP_VULN = 2
+        SMTP_VULN = 3
+        VNC_VULN = 4
+        SQL_FTP = 5
+        SQL_SMTP = 6
+        SQL_VNC = 7
+        FTP_SMTP = 8
+        FTP_VNC = 9
+        SMTP_VNC = 10
+        SQL_FTP_SMTP = 11
+        SQL_FTP_VNC = 12
+        SQL_SMTP_VNC = 13
+        FTP_SMTP_VNC = 14
+        SQL_FTP_SMTP_VNC = 15
+        ROOT = 16
+        GOAL = 17
+    '''
     config += 'Node Type\n'
     for ip in ip_vuln_dict.keys():
         config += str(ip)
+        if 'SQL' in ip_vuln_dict[ip]:
+            if 'FTP' in ip_vuln_dict[ip]:
+                if 'SMTP' in ip_vuln_dict[ip]:
+                    if 'VNC' in ip_vuln_dict[ip]:
+                        #SQL_FTP_SMTP_VNC
+                        config += ':15\n'
+                    else:
+                        #SQL_FTP_SMTP
+                        config += ':11\n'
+                elif 'VNC' in ip_vuln_dict[ip]:
+                    #SQL_FTP_VNC
+                    config += ':12\n'
+                else:
+                    #SQL_FTP
+                    config += ':5\n'
+            elif 'SMTP' in ip_vuln_dict[ip]:
+                if 'VNC' in ip_vuln_dict[ip]:
+                    #SQL_SMTP_VNC
+                    config += ':13\n'
+                else:
+                    #SQL_SMTP
+                    config+= ':6\n'
+            elif 'VNC' in ip_vuln_dict[ip]:
+                #SQL_VNC
+                config += ':7\n'
+            else:
+                #SQL_VULN
+                config+= ':1\n'
+        elif 'FTP' in ip_vuln_dict[ip]:
+            if 'SMTP' in ip_vuln_dict[ip]:
+                if 'VNC' in ip_vuln_dict[ip]:
+                    #FTP_SMTP_VNC
+                    config += ':14\n'
+                else:
+                    #FTP_SMTP
+                    config += ':8\n'
+            elif 'VNC' in ip_vuln_dict[ip]:
+                #FTP_VNC
+                config += ':9\n'
+            else:
+                #FTP_VULN
+                config += ':2\n'
+        elif 'SMTP' in ip_vuln_dict[ip]:
+            if 'VNC' in ip_vuln_dict[ip]:
+                #SMTP_VNC
+                config += ':10\n'
+            else:
+                #SMTP_VULN
+                config += ':3\n'
+        elif 'VNC' in ip_vuln_dict[ip]:
+            #VNC_VULN
+            config += ':4\n'
+        else:
+            config += ':0\n'
+        
+        '''
+        # potentially reusable code here from when
+        # there were only 3 vulns (no VNC)
         if 'FTP' in ip_vuln_dict[ip]:
             if 'SMTP' in ip_vuln_dict[ip]:
                 if 'SQL' in ip_vuln_dict[ip]:
@@ -178,6 +260,7 @@ if __name__ == '__main__':
             config += ':1\n'
         else:
             config += ':0\n'
+        '''
         
     config += 'Adjacency\n'
     for ip in ip_vuln_dict.keys():
@@ -193,18 +276,3 @@ if __name__ == '__main__':
     else:
         with open(abs_file_path, 'w') as f:
             f.write(config)
-    
-        
-'''
-node types:
-	ACCESSIBLE = 0
- 	SQL_VULN = 1
-	FTP_VULN = 2
-	MITM_VULN = 3
-	SQL_FTP = 4
-	SQL_MITM = 5
-	FTP_MITM = 6
-	SQL_FTP_MITM = 7
-	ROOT = 8
-	GOAL = 9
-'''

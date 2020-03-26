@@ -4,7 +4,7 @@ from pomdpy import Agent
 from pomdpy.solvers import POMCP
 from pomdpy.log import init_logger
 from examples.rock_sample import RockModel
-#from examples.thesis import NetworkModel
+from examples.thesis import NetworkModel
 import argparse
 import numpy as np
 

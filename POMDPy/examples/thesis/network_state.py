@@ -14,4 +14,4 @@ class NetworkState(DiscreteState):
 		pass
 
 	def to_string(self):
-		print("Implementation Error: implement to_string() in network-state.py")
+		print("Implementation Error: implement to_string() in network_state.py")
