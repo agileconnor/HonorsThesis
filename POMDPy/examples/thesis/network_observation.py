@@ -44,4 +44,5 @@ class NetworkObservation(DiscreteObservation):
         if self.vnc_vuln:
             print('VNC vulnerability')
 
-
+    def distance_to(self):
+        pass

@@ -19,6 +19,12 @@ class NetworkAction(DiscreteAction):
         super(NetworkAction, self).__init__(action_type)
         self.bin_number = action_type
 
+    def copy(self):
+        return NetworkAction(self.bin_number)
+
+    def distance_to(self):
+        return 0
+
     def to_string(self):
         out = ''
         if self.bin_number == 0:

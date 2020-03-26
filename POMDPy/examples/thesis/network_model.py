@@ -8,7 +8,7 @@ from network_state import *
 from network_position_history import NodeData, HistoricalNetworkData
 from pomdpy.discrete_pomdp import DiscreteActionPool
 from pomdpy.discrete_pomdp import DiscreteObservationPool
-from pomdpy.pomdp import Model
+from pomdpy.pomdp import Model, StepResult
 from pomdpy.util import console, config_parser
 
 
@@ -36,6 +36,8 @@ class NetworkModel(Model):
     def __init__(self, args):
         # initial setup of network model variables
         super(NetworkModel, self).__init__(args)
+        self.last_action_scan = False
+        self.fresh = True
         
         # Collected Data #
         self.unique_nodes_scanned = []
@@ -45,9 +47,13 @@ class NetworkModel(Model):
         self.network_config = json.load(open(config_parser.network_cfg, "r"))
         # read in reward values for 4 vulns
         self.sql_reward = 10
-        self.ftp_reward = 10
-        self.smtp_reward = 10
+        self.ftp_reward = 13
+        self.smtp_reward = 12
         self.vnc_reward = 10
+        self.scan_reward = 15
+        self.move_reward = 10
+        self.exit_reward = 5
+        self.illegal_move_penalty = 15
         self.map_text, _ = config_parser.parse_map(self.network_config['layout_file'])
         self.node_list = {}
         # read in raw text and build network based on it
@@ -73,60 +79,57 @@ class NetworkModel(Model):
                     for node in self.node_list.values():
                         if node.name == adj[0]:
                             node.update_adj_list(adj[1:])
-        
+
+
+    def get_node_type(self, node_in):
         for node in self.node_list.values():
-            print(node.to_string())
-            print(' ')
-
-
-    def get_node_type(self, node_name):
-        for node in self.node_list:
-            if node.name == node_name:
+            if node == node_in:
                 return node.vuln
         return -1
-
-    def start_scenario(self):
-        # begin running test
-        pass
 
     # implementation of abstract Model class #
     def create_observation_pool(self, solver):
         return DiscreteObservationPool(solver)
 
-    # come back to this one
     def is_terminal(self, node_name):
-        return self.get_node_type(node_name) is NetNodeType.GOAL
+        if self.get_node_type(node_name.current_node) is NetNodeType.GOAL:
+            return True
+        elif (len(self.unique_nodes_scanned) == len(self.node_list.keys())
+            and self.get_node_type(node_name.current_node) is NetNodeType.ROOT):
+            return True
+        return False
 
-    #unfinished
     def is_valid(self, state):
         if isinstance(state, NetworkState):
             return self.is_valid_state(state)
         else:
             return False
 
-    #unfinished
     def is_valid_state(self, state):
-        pass
+        return (state.current_node in self.node_list.keys())
 
-    #unfinished
-    def get_legal_actions(self):
-        pass
+    def get_legal_actions(self, state):
+        legal_actions = []
+        all_actions = range(0, 7)
+
+        for action in all_actions:
+            if action is ActionType.DEPLOY_AGENT:
+                continue
+            if action is ActionType.LATERAL_MOVE:
+                if len(self.unique_nodes_scanned) >= len(self.node_list):
+                    continue
+            else:
+                legal_actions.append(action)
+        return legal_actions
 
     def reset_for_simulation(self):
-        """
-        The Simulator (Model) should be reset before each simulation
-        :return:
-        """
-        pass
+        self.reset_for_epoch()
 
     def reset_for_epoch(self):
-        """
-        Defines behavior for resetting the simulator before each epoch
-        :return:
-        """
-        pass
+        self.fresh = True
+        self.last_action_scan = False
 
-    def update(self, sim_data):
+    def update(self, step_result):
         """
         Update the state of the simulator with sim_data
         :param sim_data:
@@ -135,23 +138,43 @@ class NetworkModel(Model):
         pass
 
     def generate_step(self, state, action):
-        """
-        Generates a full StepResult, including the next state, an observation, and the reward
-        *
-        * For convenience, the action taken is also included in the result, as well as a flag for
-        * whether or not the resulting next state is terminal.
-        :param state:
-        :param action:
-        :return: StepResult
-        """
-        pass
+        if action is None:
+            print('Tried to generate a step with a null action')
+            return None
+        elif type(action) is int:
+            action = NetworkAction(action)
+
+        result = StepResult()
+        result.next_state, is_legal = self.make_next_state(state, action)
+        if self.fresh and result.action is not ActionType.SCAN:
+            self.fresh = False
+            action = NetworkAction(ActionType.SCAN)
+        result.action = action.copy()
+        if result.action.bin_number is ActionType.SCAN:
+            self.last_action_scan = True
+        else:
+            self.last_action_scan = False
+        result.observation = self.make_observation(action, result.next_state)
+        result.reward = self.make_reward(state, action, result.next_state, is_legal)
+        result.is_terminal = self.is_terminal(result.next_state)
+        #print('action')
+        #print(result.action.to_string())
+        #print('observation')
+        #print(result.observation.to_string())
+        #print('next state node')
+        #print(result.next_state.current_node.to_string())
+        #sys.exit(0)
+        return result, is_legal
 
     def sample_an_init_state(self):
-        """
-        Samples an initial state from the initial belief.
-        :return: State
-        """
-        pass
+        self.unique_nodes_scanned = []
+        return NetworkState(self.node_list.values()[0], self.sample_nodes())
+
+    def sample_nodes(self):
+        node_states = []
+        for i in range(0, len(self.node_list)):
+            node_states.append(np.random.random_integers(0, (1 << len(self.node_list)) - 1) & (1 << i))
+        return node_states
 
     def sample_state_uninformed(self):
         """
@@ -162,53 +185,42 @@ class NetworkModel(Model):
         pass
 
     def sample_state_informed(self, belief):
-        """
-        :param belief:
-        :return:
-        """
-        pass
+        return belief.sample_particle()
 
     def belief_update(self, old_belief, action, observation):
-        """
-        Use bayes filter to update belief distribution
-        :param old_belief:
-        :param action
-        :param observation
-        :return:
-        """
         pass
 
     def get_all_states(self):
-        """
-        :return: list of enumerated states (discrete) or range of states (continuous)
-        """
-        pass
+        return None, 6*len(self.node_list)
      
     def get_all_actions(self):
-        """
-        :return: list of enumerated actions (discrete) or range of actions (continuous)
-        """
-        pass
+        all_actions = []
+        for code in range(0, 7):
+            if self.last_action_scan and code == 0:
+                continue
+            all_actions.append(NetworkAction(code))
+        return all_actions
 
     def get_all_observations(self):
-        """
-        :return: list of enumerated observations (discrete) or range of observations (continuous)
-        """
-        pass
+        return {
+            'SQL vulnerability': 0,
+            'FTP vulnerability': 1,
+            'SMTP vulnerability': 2,
+            'VNC vulnerability': 3,
+            'No vulnerability': 4
+        }, 5
 
     def create_action_pool(self):
-        """
-        :param solver:
-        :return:
-        """
-        pass
+        return DiscreteActionPool(self)
 
     def create_root_historical_data(self, solver):
-        """
-        reset smart data for the root of the belief tree, if smart data is being used
-        :return:
-        """
-        pass
+        self.create_new_node_data()
+        return HistoricalNetworkData(self, self.node_list.keys()[1], self.all_node_data, solver)
+
+    def create_new_node_data(self):
+        self.all_node_data = []
+        for i in range(0, len(self.node_list.keys())):
+            self.all_node_data.append(NodeData())
 
     def get_max_undiscounted_return(self):
         """
@@ -220,7 +232,7 @@ class NetworkModel(Model):
     def make_next_position(self, current_node, action_type):
         is_legal = True
         next_node = current_node
-        if action_type is ActionType.SCAN:
+        if action_type is ActionType.SCAN and not self.last_action_scan:
             pass
         elif action_type is ActionType.LATERAL_MOVE:
             if current_node not in self.unique_nodes_scanned:
@@ -230,4 +242,91 @@ class NetworkModel(Model):
                     next_node = node 
 
         return next_node, is_legal
+
+    def make_next_state(self, state, action):
+        action_type = action.bin_number
+        next_position, is_legal = self.make_next_position(state.current_node, action_type)
+        if not is_legal:
+            # returns a copy of the current state
+            return state.copy(), False
+
+        next_state_node_states = list(state.node_states)
+
+        if action_type is ActionType.SCAN:
+            self.num_scans += 1.0
+
+        return NetworkState(next_position, next_state_node_states), True
+
+    def make_observation(self, action, next_state):
+        # generate new observation if not scanning a node
+        if (action.bin_number is ActionType.SQL_VULN or action.bin_number is ActionType.FTP_VULN
+            or action.bin_number is ActionType.SMTP_VULN or action.bin_number is ActionType.VNC_VULN
+            or action.bin_number is ActionType.LATERAL_MOVE):
+            self.last_action_scan = False
+            obs = NetworkObservation()
+            return obs
+        if next_state.current_node in self.unique_nodes_scanned:
+            return NetworkObservation(False, False, False, False)
+        print('--------')
+        print(next_state)
+        print('--------')
+        # generate observation if scanning a node
+        if action.bin_number is ActionType.SCAN:
+            self.last_action_scan = True
+            if int(next_state.current_node.vuln) == 1:
+                return NetworkObservation(True, False, False, False)
+            elif int(next_state.current_node.vuln) == 2:
+                return NetworkObservation(False, True, False, False)
+            elif int(next_state.current_node.vuln) == 3:
+                return NetworkObservation(False, False, True, False)
+            elif int(next_state.current_node.vuln) == 4:
+                return NetworkObservation(False, False, False, True)
+            elif int(next_state.current_node.vuln) == 5:
+                return NetworkObservation(True, True, False, False)
+            elif int(next_state.current_node.vuln) == 6:
+                return NetworkObservation(True, False, True, False)
+            elif int(next_state.current_node.vuln) == 7:
+                return NetworkObservation(True, False, False, True)
+            elif int(next_state.current_node.vuln) == 8:
+                return NetworkObservation(False, True, True, False)
+            elif int(next_state.current_node.vuln) == 9:
+                return NetworkObservation(False, True, False, True)
+            elif int(next_state.current_node.vuln) == 10:
+                return NetworkObservation(False, False, True, True)
+            elif int(next_state.current_node.vuln) == 11:
+                return NetworkObservation(True, True, True, False)
+            elif int(next_state.current_node.vuln) == 12:
+                return NetworkObservation(True, True, False, True)
+            elif int(next_state.current_node.vuln) == 13:
+                return NetworkObservation(True, False, True, True)
+            elif int(next_state.current_node.vuln) == 14:
+                return NetworkObservation(False, True, True, True)
+            elif int(next_state.current_node.vuln) == 15:
+                return NetworkObservation(True, True, True, True)
+        return NetworkObservation(False, False, False, False)
+
+    def make_reward(self, state, action, next_state, is_legal):
+        if not is_legal:
+            return -self.illegal_move_penalty
+
+        if self.is_terminal(next_state):
+            return self.exit_reward
+
+        if action.bin_number is ActionType.SQL_VULN:
+            return self.sql_reward
+        elif action.bin_number is ActionType.FTP_VULN:
+            return self.ftp_reward
+        elif action.bin_number is ActionType.SMTP_VULN:
+            return self.smtp_reward
+        elif action.bin_number is ActionType.VNC_VULN:
+            return self.vnc_reward
+        elif action.bin_number is ActionType.SCAN:
+            return self.scan_reward
+        if action.bin_number is ActionType.LATERAL_MOVE:
+            return self.move_reward
+        return 0
+
+    def generate_reward(self, state, action):
+        next_state, is_legal = self.make_next_state(state, action)
+        return self.make_reward(state, action, next_state, is_legal)
     
