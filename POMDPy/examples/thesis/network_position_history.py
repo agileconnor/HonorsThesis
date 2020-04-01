@@ -94,7 +94,7 @@ class HistoricalNetworkData(HistoricalData):
         next_data = self.deep_copy()
         next_position, is_legal = self.model.make_next_position(self.current_node, node_action.bin_number)
         next_data.current_node = next_position
-        node_data = None
+        node_data = next_data.current_node
         #node_data = next_data.all_node_data[self.current_node]
         for node in next_data.all_node_data:
             print(node.to_string())

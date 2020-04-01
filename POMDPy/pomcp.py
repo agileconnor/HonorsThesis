@@ -42,7 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_depth', default=100, type=int, help='Max depth for a DFS of the belief search tree in '
                         'MCTS')
     parser.add_argument('--action_selection_timeout', default=60, type=int, help='Max num of secs for action selection')
-
+    parser.add_argument('--history_output', default=None, type=str, help='')
     parser.set_defaults(preferred_actions=False)
     parser.set_defaults(use_tf=False)
     parser.set_defaults(save=False)
@@ -65,9 +65,7 @@ if __name__ == '__main__':
         agent.discounted_return()
     elif args['env'] == 'NetworkProblem':
         env = NetworkModel(args)
-        #can be added in later?
-        #env.draw_env()
-        agent = Agent(env, solver)
+        agent = Agent(env, solver, args['history_output'])
         agent.discounted_return()
     else:
         print('Unknown env {}'.format(args['env']))

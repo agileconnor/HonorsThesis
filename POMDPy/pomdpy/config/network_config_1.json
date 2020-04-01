@@ -1,4 +1,12 @@
 {
 "layout_file":"network_layout_2.txt",
+"sql_reward":"12",
+"ftp_reward":"10",
+"smtp_reward":"9",
+"vnc_reward":"11",
+"scan_reward":"15",
+"move_reward":"10",
+"exit_reward":"5",
+"illegal_move_penalty":"15",
 "num_nodes":"3"
 }

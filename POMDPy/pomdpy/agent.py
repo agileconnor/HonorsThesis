@@ -16,7 +16,7 @@ class Agent:
 
     """
 
-    def __init__(self, model, solver):
+    def __init__(self, model, solver, history_output_path=None):
         """
         Initialize the POMDPY agent
         :param model:
@@ -31,6 +31,7 @@ class Agent:
         self.action_pool = self.model.create_action_pool()
         self.observation_pool = self.model.create_observation_pool(self)
         self.solver_factory = solver.reset  # Factory method for generating instances of the solver
+        self.path = history_output_path
 
     def discounted_return(self):
 
@@ -200,6 +201,15 @@ class Agent:
         # Pretty Print results
         # print_divider('large')
         solver.history.show()
+        if self.path:
+            if os.path.isfile(self.path):
+                with open(self.path, 'w') as f:
+                    f.write(solver.history.history_to_string())
+            else:
+                fi = open(self.path, 'w')
+                fi.close()
+                with open(self.path, 'w') as f:
+                    f.write(solver.history.history_to_string())
         self.results.show(epoch)
         console(3, module, 'Total possible undiscounted return: ' + str(self.model.get_max_undiscounted_return()))
         print_divider('medium')

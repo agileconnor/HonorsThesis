@@ -46,14 +46,14 @@ class NetworkModel(Model):
         # Network Configuration Data #
         self.network_config = json.load(open(config_parser.network_cfg, "r"))
         # read in reward values for 4 vulns
-        self.sql_reward = 10
-        self.ftp_reward = 13
-        self.smtp_reward = 12
-        self.vnc_reward = 10
-        self.scan_reward = 15
-        self.move_reward = 10
-        self.exit_reward = 5
-        self.illegal_move_penalty = 15
+        self.sql_reward = int(self.network_config['sql_reward'])
+        self.ftp_reward = int(self.network_config['ftp_reward'])
+        self.smtp_reward = int(self.network_config['smtp_reward'])
+        self.vnc_reward = int(self.network_config['vnc_reward'])
+        self.scan_reward = int(self.network_config['scan_reward'])
+        self.move_reward = int(self.network_config['move_reward'])
+        self.exit_reward = int(self.network_config['exit_reward'])
+        self.illegal_move_penalty = int(self.network_config['illegal_move_penalty'])
         self.map_text, _ = config_parser.parse_map(self.network_config['layout_file'])
         self.node_list = {}
         # read in raw text and build network based on it
@@ -237,7 +237,7 @@ class NetworkModel(Model):
         elif action_type is ActionType.LATERAL_MOVE:
             if current_node not in self.unique_nodes_scanned:
                 self.unique_nodes_scanned.append(current_node)
-            for node in self.node_list.keys():
+            for node in self.node_list.values():
                 if node not in self.unique_nodes_scanned:
                     next_node = node 
 
@@ -267,9 +267,7 @@ class NetworkModel(Model):
             return obs
         if next_state.current_node in self.unique_nodes_scanned:
             return NetworkObservation(False, False, False, False)
-        print('--------')
-        print(next_state)
-        print('--------')
+
         # generate observation if scanning a node
         if action.bin_number is ActionType.SCAN:
             self.last_action_scan = True
